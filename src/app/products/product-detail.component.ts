@@ -1,38 +1,44 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IProduct } from './product';
-import { ProductService } from './product.service';
+
+import { Product, ProductResolved } from './product';
 
 @Component({
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
 export class ProductDetailComponent implements OnInit {
+  pageTitle = 'Product Detail';
+  product: Product | null = null;
+  errorMessage = '';
 
   constructor(private route: ActivatedRoute,
-    private router: Router,
-    private productService: ProductService) { }
-  pageTitle: string = 'Dash';
-  errorMessage = '';
-  product: IProduct | undefined;
-
+    private router: Router) { }
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.pageTitle += `: ${id}`;
-    if(id){
-      this.getProduct(id);
+    const resolvedData: ProductResolved =
+      this.route.snapshot.data['resolvedData'];
+    this.errorMessage = String(resolvedData.error);
+    this.onProductRetrieved(resolvedData.product);
+    console.log('error message', this.errorMessage)
+  }
+
+  onProductRetrieved(product: Product | null): void {
+    this.product = product;
+
+    if (this.product) {
+      this.pageTitle = `Product Detail: ${this.product.productName}`;
+    } else {
+      this.pageTitle = 'No product found';
     }
   }
-  onBack(): void {
-    this.router.navigate(['/products']);
-  }
 
-  getProduct(id: number): void{
-    this.productService.getProduct(id).subscribe({
-      next: product => this.product = product,
-      error: err => this.errorMessage = err
-    });
-
+  doRouting(): void {
+    this.router.navigate(
+      ['/products'],
+      { queryParamsHandling: "preserve", queryParams: { message: '' } }
+    );
+    // [routerLink]="['/products']"
+    // queryParamsHandling="preserve"
   }
 }

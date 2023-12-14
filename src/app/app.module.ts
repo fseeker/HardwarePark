@@ -1,28 +1,35 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http'
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
 
+// Imports for loading & configuring the in-memory web api
+import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { ProductData } from './products/product-data';
+
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './home/welcome.component';
-import { RouterModule } from '@angular/router';
-import { ProductModule } from './products/product.module';
+import { PageNotFoundComponent } from './page-not-found.component';
+
+/* Feature Modules */
+import { UserModule } from './user/user.module';
+import { MessageModule } from './messages/message.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    WelcomeComponent
-  ],
   imports: [
     BrowserModule,
-    FormsModule,
+    BrowserAnimationsModule,
     HttpClientModule,
-    RouterModule.forRoot([
-      { path: 'welcome', component: WelcomeComponent },
-      { path: '', redirectTo: 'welcome', pathMatch: 'full' },
-      { path: '**', redirectTo: 'welcome', pathMatch: 'full' }
-    ]),
-    ProductModule
+    InMemoryWebApiModule.forRoot(ProductData, { delay: 1000 }),
+    UserModule,
+    MessageModule,
+    AppRoutingModule
+  ],
+  declarations: [
+    AppComponent,
+    WelcomeComponent,
+    PageNotFoundComponent
   ],
   bootstrap: [AppComponent]
 })

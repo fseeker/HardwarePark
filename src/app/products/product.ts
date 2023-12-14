@@ -1,10 +1,18 @@
-export interface IProduct{
-    productId: number,
-    productName: string,
-    productCode: string,
-    releaseDate: string,
-    description: string,
-    price: number,
-    starRating: number,
-    imageUrl: string
+/* Defines the product entity */
+export interface Product {
+  id: number | null;
+  productName: string;
+  productCode: string;
+  category: string;
+  tags?: string[];
+  releaseDate: string;
+  price: number;
+  description: string;
+  starRating: number;
+  imageUrl: string;
+}
+
+export interface ProductResolved {
+  product: Product | null;
+  error?: string;
 }

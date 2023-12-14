@@ -1,65 +1,56 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { IProduct } from "./product";
-import { ProductService } from "./product.service";
-import { Subscription } from "rxjs";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+import { Product } from './product';
+import { ProductService } from './product.service';
 
 @Component({
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css'],
+  styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, OnDestroy {
-  constructor(private productService: ProductService){
-
-  }
-
-  pageTitle: string = "Product-List";
-  imageWidth: number = 50;
-  imageMargin: number = 2;
-  imageView = "Show Image";
-  isImageShowed = false;
+export class ProductListComponent implements OnInit {
+  pageTitle = 'Product List';
+  imageWidth = 50;
+  imageMargin = 2;
+  showImage = false;
   errorMessage = '';
-  sub!: Subscription;
-  
-  private _listFilter: string = '';
+
+  _listFilter = '';
   get listFilter(): string {
     return this._listFilter;
   }
   set listFilter(value: string) {
     this._listFilter = value;
-    this.filteredProducts = this.filter(value)
+    this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
   }
 
+  filteredProducts: Product[] = [];
+  products: Product[] = [];
 
-  filteredProducts: IProduct[] = [];
-  products: IProduct[] = [];
-
-  toggleImage(): void {
-    this.isImageShowed = !this.isImageShowed;
-  }
+  constructor(private productService: ProductService,
+              private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.sub = this.productService.getProducts().subscribe({
+    this.listFilter = this.route.snapshot.queryParamMap.get('filterBy') || '';
+    this.showImage = this.route.snapshot.queryParamMap.get('showImage') === 'true';
+
+    this.productService.getProducts().subscribe({
       next: products => {
         this.products = products;
-        this.filteredProducts = products;
+        this.filteredProducts = this.performFilter(this.listFilter);
       },
       error: err => this.errorMessage = err
     });
-    this.listFilter = '';
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+  performFilter(filterBy: string): Product[] {
+    filterBy = filterBy.toLocaleLowerCase();
+    return this.products.filter((product: Product) =>
+      product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
   }
 
-  filter(value: string): IProduct[] {
-    value = value.toLocaleLowerCase();
-    return this.products.filter((product: IProduct) =>
-      product.productName.toLocaleLowerCase().includes(value)
-    )
+  toggleImage(): void {
+    this.showImage = !this.showImage;
   }
 
-  onRatingClicked(message: string): void {
-    this.pageTitle = "Product List: " + message;
-  }
 }
